@@ -157,6 +157,37 @@ class HomeController extends GetxController {
     await _save();
   }
 
+  Future<void> deleteEntry(String id) async {
+    entries.removeWhere((e) => e.id == id);
+    _clampSelectedMonthToRange();
+    await _save();
+  }
+
+  Future<void> updateEntry({
+    required String id,
+    required CashEntryType type,
+    required double amountUsd,
+    required double amountKhr,
+    required String note,
+    required DateTime createdAt,
+  }) async {
+    final idx = entries.indexWhere((e) => e.id == id);
+    if (idx == -1) return;
+    final updated = CashEntry(
+      id: id,
+      type: type,
+      amountUsd: amountUsd,
+      amountKhr: amountKhr,
+      createdAt: createdAt,
+      note: note,
+    );
+    entries[idx] = updated;
+    // Ensure ordering and month clamping remain sensible
+    entries.refresh();
+    _clampSelectedMonthToRange();
+    await _save();
+  }
+
   Future<void> clearAll() async {
     entries.clear();
     await _storageService.clearAll();
